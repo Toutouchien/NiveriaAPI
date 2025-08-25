@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import org.joml.Vector3d;
 import toutouchien.niveriaapi.utils.base.Task;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class ParticleUtils {
         throw new IllegalStateException("Utility class");
     }
 
-    public static <T> void spawnParticleForPlayer(Player player, Location location, Particle particle, int count, double offsetX, double offsetY, double offsetZ, double speed, T data, boolean force) {
+    public static <T> void spawnParticleForPlayer(Player player, Vector3d location, Particle particle, int count, double offsetX, double offsetY, double offsetZ, double speed, T data, boolean force) {
         NMSUtils.sendPacket(player, new ClientboundLevelParticlesPacket(
                 CraftParticle.createParticleParam(particle, data),
                 force,
@@ -37,7 +38,7 @@ public class ParticleUtils {
     }
 
     // Display a particle visible only to specific players
-    public static <T> void spawnParticleForPlayers(Collection<Player> players, Location location, Particle particle, int count, double offsetX, double offsetY, double offsetZ, double speed, T data, boolean force) {
+    public static <T> void spawnParticleForPlayers(Collection<Player> players, Vector3d location, Particle particle, int count, double offsetX, double offsetY, double offsetZ, double speed, T data, boolean force) {
         ClientboundLevelParticlesPacket particlesPacket = new ClientboundLevelParticlesPacket(
                 CraftParticle.createParticleParam(particle, data),
                 force,
@@ -57,7 +58,7 @@ public class ParticleUtils {
 
     // Display a single particle at a location
     public static <T> void spawnParticle(Location location, Particle particle, int count, double offsetX, double offsetY, double offsetZ, double speed, T data, boolean force) {
-        spawnParticleForPlayers(location.getWorld().getPlayers(), location, particle, count, offsetX, offsetY, offsetZ, speed, data, force);
+        spawnParticleForPlayers(location.getWorld().getPlayers(), location.toVector().toVector3d(), particle, count, offsetX, offsetY, offsetZ, speed, data, force);
     }
 
     // Display a colored particle
@@ -336,15 +337,15 @@ public class ParticleUtils {
     public static void drawGradient(Location start, Location end, int steps, Function<Double, Color> colorFunction, double offsetX, double offsetY, double offsetZ, double speed) {
         if (!start.getWorld().equals(end.getWorld()))
             throw new IllegalArgumentException("Locations must be in the same world");
-        
+
         Vector direction = end.clone().subtract(start).toVector();
         double distance = direction.length();
         direction.normalize();
-        
+
         for (int i = 0; i <= steps; i++) {
             double fraction = (double) i / steps;
             Location particleLocation = start.clone().add(direction.clone().multiply(distance * fraction));
-            
+
             Color color = colorFunction.apply(fraction);
             Particle.DustOptions dustOptions = new Particle.DustOptions(color, 1.0f);
 
